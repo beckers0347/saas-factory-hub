@@ -1,7 +1,7 @@
 # Setup and status
 
-Written 2026-11-19. Nothing here is running yet. No GitHub repo, GitHub App, Vercel project,
-agent box or provider account has been created; those are owner steps listed below.
+Written 2026-11-19. Nothing here is running yet. The hub repo exists with its rulesets (section 3). No GitHub
+App, Vercel project, agent box or provider account has been created yet.
 
 ## 1. What exists and how it was checked
 
@@ -40,23 +40,36 @@ Additions beyond the blueprint: `--max-budget-usd` per run (default 2, override 
 `RUN_BUDGET_USD`); per-run caps of 20 drafts and 10 pages inside `support-ops`; a `domains`
 list per product in the registry, which becomes the reply-link allowlist.
 
-## 3. Owner steps for rollout step 1 (control plane)
+## 3. Rollout step 1 (control plane): state on 2026-11-19
 
-Do these in order. Do not start step 2 on real data until every proof passes.
+Done, on https://github.com/beckers0347/saas-factory-hub (public, because GitHub Free does
+not enforce rulesets or offer secret scanning on private repos):
 
-1. Create a private GitHub repo `saas-factory-hub` and push this folder to `main`.
-   Open `.github/CODEOWNERS` on GitHub and confirm it shows no errors.
-2. Turn on secret scanning with push protection.
-3. Create a GitHub App with **Contents: read and write** and nothing else. Install it on the hub and on each product repo.
-4. Add a ruleset on every branch except `fix/**` and `agent/**` that blocks creation, update, deletion and force pushes, with an empty bypass list. Give GitHub Actions bypass on the `snapshots` branch only.
-5. Protect `main`: require a pull request, one approval, code-owner review, and (in product repos) the `agent-branch-ci` check.
-6. In each product repo: enable "Allow GitHub Actions to create pull requests", keep the default workflow token read-only, and copy in `templates/product-repo/.github/workflows/agent-branch-ci.yml`.
-7. In Vercel, set the Production Branch to `release`. Live keys go in the Production environment only.
-8. **Proofs.** In a throwaway repo, confirm each of these and write down the date:
-   - [ ] The App token is refused pushing to `main`, to a tag, and to `release`.
-   - [ ] The App token can push `fix/test` and `agent/test`.
-   - [ ] The snapshot job can push the `snapshots` branch and the App token cannot.
-   - [ ] On the agent box, repeat the permission test from section 1: writes to `patches/` and `state/` succeed; writes to `scripts/`, `.github/` and `src/` and reads of `.env` are refused.
+- [x] Repo created and pushed. `.github/CODEOWNERS` reports 0 errors.
+- [x] Secret scanning and push protection enabled.
+- [x] Ruleset "agent-confinement": every branch except `fix/**` and `agent/**` blocks creation, update, deletion and force pushes.
+- [x] Ruleset "main": changes only through a pull request, with one approval and code-owner review.
+- [x] Ruleset "tags: owner only": tag creation, update and deletion blocked.
+- [x] Default workflow token is read-only.
+- [x] Proof: a direct push to `main` by the owner is refused; the same change merges through a pull request.
+
+Difference from the blueprint: it asks for an empty bypass list. Applied literally that
+locks the owner out too (no merge to `main`, no push to `release`), and GitHub does not let
+you approve your own pull request. So the repository admin role is the only bypass: "always"
+on agent-confinement and tags, and "pull requests only" on main. The agent App has no admin
+role and gets no bypass. A pull request opened by `github-actions[bot]` still needs the
+owner's approval to merge without using the bypass.
+
+Still to do, by the owner unless noted:
+
+1. Create a GitHub App with **Contents: read and write** and nothing else (no webhook, "Only on this account"). Install it on the hub and on each product repo. Keep its private key in your password manager until the agent box exists.
+2. Proofs with the App's installation token, in a throwaway repo carrying the same three rulesets:
+   - [ ] Refused pushing to `main`, to a tag, and to `release`.
+   - [ ] Allowed pushing `fix/test` and `agent/test`.
+3. When the snapshot job is built: exclude `snapshots` from agent-confinement, give GitHub Actions the only write path to it, then prove the job can push it and the App cannot.
+4. For each product repo: the same three rulesets, plus the `agent-branch-ci` required check on `main`; enable "Allow GitHub Actions to create pull requests"; copy in `templates/product-repo/.github/workflows/agent-branch-ci.yml`.
+5. In Vercel, per product project: set the Production Branch to `release`; live keys in the Production environment only.
+6. On the agent box, repeat the permission test from section 1: writes to `patches/` and `state/` succeed; writes to `scripts/`, `.github/` and `src/` and reads of `.env` are refused.
 
 ## 4. Agent box
 
