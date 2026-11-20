@@ -1,0 +1,8 @@
+{
+  "name": "saas-factory-mcp",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Scoped MCP servers for the saas-factory plugin. No dependencies.",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test" }
+}

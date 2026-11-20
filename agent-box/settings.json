@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash",
+      "PowerShell",
+      "WebFetch",
+      "WebSearch",
+      "Read(./**/.env*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Edit(./.github/**)",
+      "Edit(./scripts/**)",
+      "Edit(./plugins/**)",
+      "Edit(./.claude/**)",
+      "Edit(./agent-box/**)",
+      "Edit(./supabase/migrations/**)",
+      "Edit(./portfolio/registry.json)",
+      "Edit(./portfolio/learnings.md)"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "social-trends": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/social-trends-server.js"],
+      "env": {
+        "TREND_API_BASE": "${TREND_API_BASE:-}",
+        "TREND_DATA_API_KEY": "${TREND_DATA_API_KEY:-}"
+      }
+    },
+    "marketing-read": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/marketing-read-server.js"],
+      "env": {
+        "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
+        "SEO_API_BASE": "${SEO_API_BASE:-}",
+        "SEO_API_KEY": "${SEO_API_KEY:-}",
+        "ANALYTICS_API_BASE": "${ANALYTICS_API_BASE:-}",
+        "ANALYTICS_READ_KEY": "${ANALYTICS_READ_KEY:-}"
+      }
+    },
+    "marketing-draft": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/marketing-draft-server.js"],
+      "env": { "PRODUCT_SLUG": "${PRODUCT_SLUG:-}" }
+    },
+    "outbound-research": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/outbound-research-server.js"],
+      "env": {
+        "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
+        "OUTREACH_REGIONS": "${OUTREACH_REGIONS:-US}",
+        "LEAD_API_BASE": "${LEAD_API_BASE:-}",
+        "LEAD_SEARCH_KEY": "${LEAD_SEARCH_KEY:-}"
+      }
+    },
+    "support-ops": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/support-ops-server.js"],
+      "env": {
+        "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
+        "PRODUCT_DOMAINS": "${PRODUCT_DOMAINS:-}",
+        "SUPPORT_API_BASE": "${SUPPORT_API_BASE:-}",
+        "SUPPORT_DRAFT_KEY": "${SUPPORT_DRAFT_KEY:-}",
+        "MONITORING_API_BASE": "${MONITORING_API_BASE:-}",
+        "MONITORING_READ_KEY": "${MONITORING_READ_KEY:-}",
+        "ALERT_WEBHOOK_URL": "${ALERT_WEBHOOK_URL:-}",
+        "FACTORY_FIXTURE_DIR": "${FACTORY_FIXTURE_DIR:-}"
+      }
+    }
+  }
+}

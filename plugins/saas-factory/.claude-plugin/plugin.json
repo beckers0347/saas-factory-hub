@@ -1,0 +1,5 @@
+{
+  "name": "saas-factory",
+  "version": "0.3.0",
+  "description": "Micro-SaaS factory: agents propose, non-LLM scripts apply, a human releases."
+}

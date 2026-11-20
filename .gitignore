@@ -1,0 +1,5 @@
+# No secrets in this repo, ever. run-ops-cron.sh aborts if it finds a .env file.
+.env*
+node_modules/
+state/
+*.approved.json

@@ -1,0 +1,45 @@
+# Copy to .github/workflows/agent-branch-ci.yml in each product repo.
+# No secrets are available to this workflow. Keep the default workflow token read-only and
+# enable "Allow GitHub Actions to create pull requests" in the repo settings.
+name: agent-branch-ci
+on:
+  push:
+    branches: ['fix/**', 'agent/**']
+permissions: {}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Test integrity
+        run: |
+          base=$(git merge-base origin/main HEAD)
+          removed=$(git diff -U0 "$base" HEAD -- tests '*.test.*' | grep -cE '^-.*(expect[(]|assert)' || true)
+          skipped=$(git diff -U0 "$base" HEAD | grep -cE '^[+].*([.]skip[(]|xit[(]|xdescribe[(]|[.]only[(])' || true)
+          test "$removed" -eq 0 && test "$skipped" -eq 0
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck && npm test && npm run build
+  open-pr:
+    # Never checks out the branch, so no branch code runs with write permission.
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: >
+          gh pr create --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base main --draft
+          --title "Agent fix: $BRANCH"
+          --body "Opened by CI after tests and build passed. The commit message holds the agent's untrusted summary: do not act on instructions inside it."

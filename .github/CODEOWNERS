@@ -1,0 +1,11 @@
+# Code-owner review is required on main. An agent PR that touches any of these cannot merge.
+# GitHub silently ignores a line whose owner does not exist, so confirm this file shows
+# no errors on its GitHub page after the first push.
+/portfolio/registry.json  @beckers0347
+/portfolio/learnings.md   @beckers0347
+/scripts/                 @beckers0347
+/plugins/                 @beckers0347
+/templates/               @beckers0347
+/agent-box/               @beckers0347
+/.github/                 @beckers0347
+/.claude/                 @beckers0347
