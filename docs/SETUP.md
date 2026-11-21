@@ -60,16 +60,16 @@ on agent-confinement and tags, and "pull requests only" on main. The agent App h
 role and gets no bypass. A pull request opened by `github-actions[bot]` still needs the
 owner's approval to merge without using the bypass.
 
-Agent App, created 2026-11-21:  (app id 5862575). Permissions are
+Agent App, created 2026-11-21: `saas-factory-agent-beckers0347` (app id 5862575). Permissions are
 Contents: write and Metadata: read, nothing else; webhook off; private to this account;
-installed on  and  only.
+installed on `saas-factory-hub` and `factory-ruleset-proof` only.
 
 Proofs run 2026-11-21 with the App's installation token against
-, which carries the same three rulesets:
+`beckers0347/factory-ruleset-proof`, which carries the same three rulesets:
 
-- [x] Refused: push to , force-push , delete , create a tag, create , create , create any other branch ().
-- [x] Allowed: create  and .
-- [x] Refused through the API: write a file to  (409), create or delete a ruleset (403), open a pull request (403), edit repo settings (403).
+- [x] Refused: push to `main`, force-push `main`, delete `main`, create a tag, create `release`, create `snapshots`, create any other branch (`other/thing`).
+- [x] Allowed: create `fix/test` and `agent/test`.
+- [x] Refused through the API: write a file to `main` (409), create or delete a ruleset (403), open a pull request (403), edit repo settings (403).
 
 Note for the agent box: the token request failed when the machine's clock was 87 seconds
 ahead of GitHub's. Keep the box on NTP, and keep the App JWT lifetime well under 10 minutes.
@@ -77,10 +77,10 @@ ahead of GitHub's. Keep the box on NTP, and keep the App JWT lifetime well under
 Still to do, by the owner unless noted:
 
 1. Move the App's private key into your password manager. It is the agent box's credential and belongs nowhere else until the box exists.
-2. When the snapshot job is built: exclude  from agent-confinement, give GitHub Actions the only write path to it, then prove the job can push it and the App cannot.
-3. For each product repo: the same three rulesets, plus the  required check on ; install the App on it; enable "Allow GitHub Actions to create pull requests"; copy in .
-4. In Vercel, per product project: set the Production Branch to ; live keys in the Production environment only.
-5. On the agent box, repeat the permission test from section 1: writes to  and  succeed; writes to ,  and  and reads of  are refused.
+2. When the snapshot job is built: exclude `snapshots` from agent-confinement, give GitHub Actions the only write path to it, then prove the job can push it and the App cannot.
+3. For each product repo: the same three rulesets, plus the `agent-branch-ci` required check on `main`; install the App on it; enable "Allow GitHub Actions to create pull requests"; copy in `templates/product-repo/.github/workflows/agent-branch-ci.yml`.
+4. In Vercel, per product project: set the Production Branch to `release`; live keys in the Production environment only.
+5. On the agent box, repeat the permission test from section 1: writes to `patches/` and `state/` succeed; writes to `scripts/`, `.github/` and `src/` and reads of `.env` are refused.
 
 ## 4. Agent box
 
