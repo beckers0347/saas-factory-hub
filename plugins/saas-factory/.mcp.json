@@ -2,15 +2,22 @@
   "mcpServers": {
     "social-trends": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/social-trends-server.js"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/social-trends-server.js"
+      ],
       "env": {
         "TREND_API_BASE": "${TREND_API_BASE:-}",
-        "TREND_DATA_API_KEY": "${TREND_DATA_API_KEY:-}"
+        "TREND_DATA_API_KEY": "${TREND_DATA_API_KEY:-}",
+        "DATAFORSEO_BASIC_AUTH": "${DATAFORSEO_BASIC_AUTH:-}",
+        "DATAFORSEO_API_BASE": "${DATAFORSEO_API_BASE:-}",
+        "FACTORY_KEYS_FILE": "${FACTORY_KEYS_FILE:-}"
       }
     },
     "marketing-read": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/marketing-read-server.js"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/marketing-read-server.js"
+      ],
       "env": {
         "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
         "SEO_API_BASE": "${SEO_API_BASE:-}",
@@ -21,12 +28,18 @@
     },
     "marketing-draft": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/marketing-draft-server.js"],
-      "env": { "PRODUCT_SLUG": "${PRODUCT_SLUG:-}" }
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/marketing-draft-server.js"
+      ],
+      "env": {
+        "PRODUCT_SLUG": "${PRODUCT_SLUG:-}"
+      }
     },
     "outbound-research": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/outbound-research-server.js"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/outbound-research-server.js"
+      ],
       "env": {
         "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
         "OUTREACH_REGIONS": "${OUTREACH_REGIONS:-US}",
@@ -36,7 +49,9 @@
     },
     "support-ops": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/support-ops-server.js"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/support-ops-server.js"
+      ],
       "env": {
         "PRODUCT_SLUG": "${PRODUCT_SLUG:-}",
         "PRODUCT_DOMAINS": "${PRODUCT_DOMAINS:-}",

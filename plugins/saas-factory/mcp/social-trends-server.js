@@ -5,6 +5,7 @@
 const { serve } = require('./lib/server');
 const { NOTICE, sanitize, wrapUntrusted } = require('./lib/untrusted');
 const { source } = require('./lib/sources');
+const dataforseo = require('./lib/dataforseo');
 
 const unverified = (signal, humanStep) => ({ signal, verified: false, weight: 0, note: `No verified source is configured. ${humanStep}` });
 
@@ -12,11 +13,21 @@ function makeTools(env = process.env) {
   return [
     {
       name: 'query_search_trends',
-      description: 'Returns search volume and 90-day trend for up to 10 keywords.',
+      description: 'Returns US monthly search volume and 90-day trend for up to 10 keywords. Each call may cost money, so batch keywords into one call.',
       inputSchema: { type: 'object', properties: { keywords: { type: 'array' } }, required: ['keywords'] },
       handler: async ({ keywords }) => {
-        const list = keywords.filter((k) => typeof k === 'string').map((k) => sanitize(k, 80)).filter(Boolean).slice(0, 10);
+        const list = [...new Set(keywords.filter((k) => typeof k === 'string').map((k) => sanitize(k, 80).toLowerCase()).filter(Boolean))].slice(0, 10);
         if (!list.length) throw new Error('keywords must hold at least one string');
+        if (dataforseo.configured(env)) {
+          const out = await dataforseo.searchVolume(env, list);
+          return {
+            signal: 'rising search interest', verified: true, weight: 1,
+            source: 'DataForSEO, Google Ads search volume, United States',
+            note: 'volume is average monthly searches. trend_pct_90d compares the latest three months with the three before. null means the source had no figure: treat it as unknown, not as zero.',
+            cost_usd: out.cost_usd,
+            keywords: out.keywords,
+          };
+        }
         const data = await source(env, 'trend', 'search-trends', {
           baseEnv: 'TREND_API_BASE', keyEnv: 'TREND_DATA_API_KEY', query: { keywords: list.join(',') },
         });
@@ -89,6 +100,9 @@ function makeTools(env = process.env) {
   ];
 }
 
-if (require.main === module) serve({ name: 'social-trends', version: '0.3.0' }, makeTools());
+if (require.main === module) {
+  dataforseo.loadKeysFile(process.env); // keys file outside the repo; a no-op when absent
+  serve({ name: 'social-trends', version: '0.3.0' }, makeTools());
+}
 
 module.exports = { makeTools };
