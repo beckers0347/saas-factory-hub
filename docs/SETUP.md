@@ -9,7 +9,7 @@ GitHub App exists. No Vercel project, agent box or provider account has been cre
 |---|---|---|
 | `scripts/apply-patches.sh` | Throwaway repos, two layouts (agent folders git-ignored and not) | Good patch pushed as `fix/ticket-<id>` with only its own files; patches touching `.github/`, root or nested `package.json`, with no test, over 200 lines, with a rename, or unparsable were rejected; second run skipped handled tickets |
 | `scripts/require-status.sh` | Throwaway hub repo | Exit 0 for an allowed status, 1 for a wrong one, 2 for unknown or status-less products; reads `origin/main`, ignores a tampered working tree |
-| MCP servers | `npm test` in `plugins/saas-factory/mcp` | 37 tests pass |
+| MCP servers | `npm test` in `plugins/saas-factory/mcp` | 44 tests pass |
 | Headless support run | `claude -p` with the cron wrapper's flags against fixture tickets | How-to ticket: draft grounded in docs. Bug ticket: patch plus regression test, then applied by `apply-patches.sh` to a pushed branch. Refund ticket and a prompt-injection ticket: owner paged, no draft, nothing followed. No tracked file modified |
 | Permission rules | `claude -p` asked to write to five folders and read two `.env` files | See section 2 |
 | Public forum sources | Live call | Hacker News and Stack Overflow both returned results |
@@ -100,6 +100,7 @@ Environment file `/etc/factory/agent.env` (mode 0600), agent-zone values only:
 | `SEO_API_BASE`, `SEO_API_KEY`, `ANALYTICS_API_BASE`, `ANALYTICS_READ_KEY` | Read-only marketing data |
 | `LEAD_API_BASE`, `LEAD_SEARCH_KEY` | Lead search only, no send |
 | `TREND_API_BASE`, `TREND_DATA_API_KEY` | Search-trend and ad data, read-only |
+| `DATAFORSEO_BASIC_AUTH` | Search volume, read-only. Only needed if trend research runs on the box |
 | `RUN_BUDGET_USD` | Optional per-run spend cap |
 
 Never on the box: any `.env` file (the wrappers abort if they find one), payment keys, the
@@ -110,8 +111,8 @@ heartbeat newer than 7 days the wrappers do nothing.
 
 ## 5. Data contracts (unverified sources)
 
-No support desk, monitoring, SEO, analytics, lead or trend provider has been chosen or
-tested. Each MCP server calls a base URL from the environment with a bearer key and expects
+Apart from search volume (see the end of this section), no support desk, monitoring, SEO,
+analytics, lead or ad-data provider has been chosen or tested. Each MCP server calls a base URL from the environment with a bearer key and expects
 the JSON below. For each provider, either point the base URL at a thin adapter you own that
 returns this shape, or replace the call in the server. Until a source is configured its tool
 answers "not configured" (trend tools answer `verified: false, weight: 0`) and never invents data.
@@ -134,6 +135,28 @@ never follow redirects, and time out after 20 seconds.
 For a dry run with no provider, set `FACTORY_FIXTURE_DIR` to a folder of JSON files laid out
 as `<source>/<path>.json` (for example `support/products/<slug>/tickets.json`). Drafts then
 land in `state/drafts/` and pages in `state/pages.log`.
+
+### Search volume: DataForSEO (connected 2026-11-24)
+
+`query_search_trends` uses DataForSEO when a credential is present, and falls back to the
+generic `trend` contract above when it is not. One call sends up to 10 keywords to
+`POST v3/keywords_data/google_ads/search_volume/live` for the United States in English and
+returns, per keyword, `volume`, `trend_pct_90d`, `cpc_usd` and `competition`.
+
+- `trend_pct_90d` is worked out here, not by the provider: the latest three months of
+  `monthly_searches` against the three before. It is `null` with under six months of history
+  or a zero base. A missing figure is always `null`, never zero.
+- The credential is read from the environment (`DATAFORSEO_BASIC_AUTH`, or `DATAFORSEO_LOGIN`
+  plus `DATAFORSEO_PASSWORD`), or from a keys file outside any repo: `FACTORY_KEYS_FILE`, or
+  `~/.saas-factory/data-keys.env` by default. Only `DATAFORSEO_*` lines are read from that file.
+- Every live call costs money. A server process stops after 10 calls, and the tool reports
+  `cost_usd` from each response.
+- The provider reports errors inside an HTTP 200. The adapter treats any status other than
+  20000, at the top level or on the task, as a failure.
+- Checked 2026-11-24 against `sandbox.dataforseo.com` (free, canned keywords): the response
+  fields match what the adapter reads. Five live calls of 10 keywords each returned real
+  figures the same day, at $0.09 per call.
+- Set `DATAFORSEO_API_BASE=https://sandbox.dataforseo.com` to exercise the tool at no cost.
 
 ## 6. Registry entry shape
 
@@ -163,7 +186,7 @@ no domains every link is refused.
 
 - **Metrics snapshot job** (daily CI job writing `snapshots/YYYY-MM-DD.json`): depends on which payment provider and analytics tool you choose at Gate 2. `run-expansion-cron.sh` exits quietly until that branch exists.
 - **`send_one` in `send-batch.sh`**: a stub that refuses to send. It depends on your cold-email provider, and must add one-click unsubscribe, your postal address and accurate headers.
-- **Provider adapters** for the sources in section 5.
+- **Provider adapters** for the sources in section 5, other than search volume.
 - **Any product**: the waitlist page and app are built per product in a build session, after you pick a niche (rollout step 3).
 - **Auto-send for a reply class**: the registry flag is described in the blueprint but nothing reads it. Every reply is a draft.
 - Legal, tax, Terms and Privacy text, and regional email rules are outside this repo and need a professional.

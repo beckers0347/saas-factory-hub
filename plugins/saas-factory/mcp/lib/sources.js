@@ -1,7 +1,7 @@
 'use strict';
 // One place for every outbound HTTP call the MCP servers make. Calls go only to base URLs
 // taken from the environment (never from a tool argument), never follow redirects, and
-// are capped in time and size. See docs/data-contracts.md for the expected JSON shapes.
+// are capped in time and size. See docs/SETUP.md for the expected JSON shapes.
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -15,7 +15,9 @@ function checkPath(p) {
   return parts;
 }
 
-async function requestJson(baseUrl, apiPath, { key, method = 'GET', body, query } = {}) {
+// `key` sends "Authorization: Bearer <key>". `authHeader` sends that exact header value
+// instead, for providers that use another scheme.
+async function requestJson(baseUrl, apiPath, { key, authHeader, method = 'GET', body, query } = {}) {
   const base = new URL(baseUrl);
   const local = base.hostname === 'localhost' || base.hostname === '127.0.0.1';
   if (base.protocol !== 'https:' && !(local && base.protocol === 'http:')) {
@@ -27,7 +29,8 @@ async function requestJson(baseUrl, apiPath, { key, method = 'GET', body, query 
   }
   if (url.origin !== base.origin) throw new Error('request left the configured API origin');
   const headers = { accept: 'application/json' };
-  if (key) headers.authorization = `Bearer ${key}`;
+  if (authHeader) headers.authorization = authHeader;
+  else if (key) headers.authorization = `Bearer ${key}`;
   if (body !== undefined) headers['content-type'] = 'application/json';
   const res = await fetch(url, {
     method,
