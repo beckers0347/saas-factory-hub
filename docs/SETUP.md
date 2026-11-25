@@ -154,7 +154,8 @@ returns, per keyword, `volume`, `trend_pct_90d`, `cpc_usd` and `competition`.
 - The provider reports errors inside an HTTP 200. The adapter treats any status other than
   20000, at the top level or on the task, as a failure.
 - Checked 2026-11-24 against `sandbox.dataforseo.com` (free, canned keywords): the response
-  fields match what the adapter reads. No paid live call has been made yet.
+  fields match what the adapter reads. Five live calls of 10 keywords each returned real
+  figures the same day, at $0.09 per call.
 - Set `DATAFORSEO_API_BASE=https://sandbox.dataforseo.com` to exercise the tool at no cost.
 
 ## 6. Registry entry shape
